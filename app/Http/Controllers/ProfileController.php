@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 class ProfileController extends Controller
 {
     /**
-     * Profile page
+     * Profile page.
      *
      * @return Application|Factory|View|\Illuminate\Foundation\Application
      */
