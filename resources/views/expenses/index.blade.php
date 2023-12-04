@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container">
-        <h2>Expenses</h2>
+        <h4><b>Expenses</b></h4><br>
         <a href="{{ route('expenses.create') }}" class="btn btn-primary mb-3">Add Expense</a>
 
         @if(session('success'))
