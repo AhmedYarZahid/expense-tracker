@@ -15,6 +15,7 @@
                 <th>Category</th>
                 <th>Expense Type</th>
                 <th>Amount</th>
+                <th>Date Created</th>
                 <th>Actions</th>
             </tr>
             </thead>
@@ -24,6 +25,7 @@
                     <td>{{ $expense->category->name }}</td>
                     <td>{{ $expense->expense_type }}</td>
                     <td>${{ $expense->amount }}</td>
+                    <td>{{ $expense->created_at }}</td>
                     <td>
                         <a href="{{ route('expenses.edit', $expense->id) }}" class="btn btn-warning">Edit</a>
                         <form action="{{ route('expenses.destroy', $expense->id) }}" method="post" style="display:inline;">
