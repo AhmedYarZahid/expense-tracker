@@ -25,6 +25,7 @@ Auth::routes();
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 Route::resource('categories', CategoryController::class);
 Route::resource('expenses', ExpenseController::class);
 Route::get('/dashboard/expense-stats', [HomeController::class, 'getExpenseStats']);

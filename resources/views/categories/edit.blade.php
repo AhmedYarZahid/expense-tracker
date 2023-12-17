@@ -4,6 +4,12 @@
     <div class="container">
         <h4><b>Edit Category</b></h4><br>
 
+        @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @elseif(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
+
         @if($errors->any())
             <div class="alert alert-danger">
                 <ul>

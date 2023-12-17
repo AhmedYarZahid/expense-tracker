@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\Expense;
 use Carbon\Carbon;
@@ -33,7 +34,7 @@ class HomeController extends Controller
      * get expense stats based on filters
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function getExpenseStats(Request $request)
     {
@@ -62,6 +63,11 @@ class HomeController extends Controller
         if ($startDate && $endDate) {
             $queryIn->whereBetween('created_at', [$startDate, $endDate]);
             $queryOut->whereBetween('created_at', [$startDate, $endDate]);
+            $expenses = Expense::when($request->get('filter'), function ($query, $filter) use ($startDate, $endDate) {
+                return $query->whereBetween('created_at', [$startDate, $endDate]);
+            })->with('category')->get();
+        } else {
+            $expenses = Expense::with('category')->get();
         }
 
         $totalInExpenses = $queryIn->where('expense_type', 'in')->sum('amount');
@@ -70,6 +76,7 @@ class HomeController extends Controller
         return response()->json([
             'totalInExpenses' => $totalInExpenses,
             'totalOutExpenses' => $totalOutExpenses,
+            'expenses' => $expenses
         ]);
     }
 }

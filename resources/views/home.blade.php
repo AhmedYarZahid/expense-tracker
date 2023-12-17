@@ -4,6 +4,12 @@
     <div class="container">
         <h4><b>Expense Statistics</b></h4><br>
 
+        @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @elseif(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
+
         <div>
             <label for="filter">Filter:</label>
             <select id="filter" onchange="updateStats()">
@@ -15,13 +21,28 @@
         </div>
 
         <canvas id="expenseChart" width="400" height="200"></canvas>
+
+        <br>
+
+        <table class="table" id="expensesTable">
+            <thead>
+            <tr>
+                <th>Category</th>
+                <th>Expense Type</th>
+                <th>Amount</th>
+                <th>Date Created</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </div>
 
     <script>
         /**
-         * Update stats
+         * Update dashboard.
          */
-        function updateStats() {
+        function updateDashboard() {
             var filter = document.getElementById('filter').value;
 
             // Make an AJAX request to the backend to get updated stats
@@ -33,6 +54,9 @@
                 .then(function (response) {
                     // Update the chart with the new data
                     updateChart(response.data);
+
+                    // Update the expenses list
+                    updateExpensesList(response.data);
                 })
                 .catch(function (error) {
                     console.error('Error updating stats:', error);
@@ -40,7 +64,7 @@
         }
 
         /**
-         * Update chart
+         * Update chart.
          *
          * @param data
          */
@@ -95,7 +119,37 @@
             });
         }
 
-        updateStats();
+        /**
+         * Update expenses list.
+         *
+         * @param data
+         */
+        function updateExpensesList(data) {
+            var expensesTable = document.getElementById('expensesTable');
+            var expensesRows = '';
+
+            data.expenses.forEach(function(expense) {
+                expensesRows += '<tr>';
+                expensesRows += '<td>' + expense.category.name + '</td>';
+                expensesRows += '<td>' + expense.expense_type + '</td>';
+                expensesRows += '<td>$' + expense.amount + '</td>';
+                expensesRows += '<td>' + expense.created_at.replace("T", " ").replace(".000000Z", "") + '</td>';
+                expensesRows += '<td>';
+                expensesRows += '<a href="/expenses/' + expense.id + '/edit" class="btn btn-warning">Edit</a>&nbsp';
+                expensesRows += '<form action="/expenses/' + expense.id + '" method="post" style="display:inline;">';
+                expensesRows += '@csrf';
+                expensesRows += '@method("DELETE")';
+                expensesRows += '<button type="submit" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Delete</button>';
+                expensesRows += '</form>';
+                expensesRows += '</td>';
+                expensesRows += '</tr>';
+            });
+
+            // Replace the content of the tbody with the updated expenses rows
+            expensesTable.querySelector('tbody').innerHTML = expensesRows;
+        }
+
+        updateDashboard();
     </script>
 @endsection
 

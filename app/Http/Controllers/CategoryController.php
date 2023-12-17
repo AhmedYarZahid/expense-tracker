@@ -8,6 +8,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Models\Category;
+use Illuminate\Database\QueryException;
 
 class CategoryController extends Controller
 {
@@ -75,7 +76,7 @@ class CategoryController extends Controller
 
         $category->update($request->all());
 
-        return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
+        return redirect()->back()->with('success', 'Category updated successfully.');
     }
 
     /**
@@ -86,8 +87,14 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        $category->delete();
-
-        return redirect()->route('categories.index')->with('success', 'Category deleted successfully.');
+        try {
+            $category->delete();
+            return redirect()->back()->with('success', 'Category deleted successfully.');
+        } catch (QueryException $e) {
+            if ($e->getCode() == '23000') { // MySQL error code for foreign key constraint violation
+                return redirect()->back()->with('error', 'Cannot delete the category. It is associated with one or more expenses.');
+            }
+            return redirect()->back()->with('error', 'An error occurred while deleting the category.');
+        }
     }
 }

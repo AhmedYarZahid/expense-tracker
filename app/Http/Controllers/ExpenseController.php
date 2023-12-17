@@ -82,7 +82,7 @@ class ExpenseController extends Controller
 
         $expense->update($request->all());
 
-        return redirect()->route('expenses.index')->with('success', 'Expense updated successfully.');
+        return redirect()->back()->with('success', 'Expense updated successfully.');
     }
 
     /**
@@ -95,6 +95,6 @@ class ExpenseController extends Controller
     {
         $expense->delete();
 
-        return redirect()->route('expenses.index')->with('success', 'Expense deleted successfully.');
+        return redirect()->back()->with('success', 'Expense deleted successfully.');
     }
 }
