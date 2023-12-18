@@ -12,7 +12,7 @@
 
         <div>
             <label for="filter">Filter:</label>
-            <select id="filter" onchange="updateStats()">
+            <select id="filter" onchange="updateDashboard()">
                 <option value="all" selected>All</option>
                 <option value="today">Today</option>
                 <option value="last_week">Last Week</option>
