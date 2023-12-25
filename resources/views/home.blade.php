@@ -11,12 +11,19 @@
         @endif
 
         <div>
-            <label for="filter">Filter:</label>
-            <select id="filter" onchange="updateDashboard()">
+            <label for="duration_filter">Filter by Duration:</label>
+            <select id="duration_filter" onchange="updateDashboard()">
                 <option value="all" selected>All</option>
                 <option value="today">Today</option>
                 <option value="last_week">Last Week</option>
                 <option value="last_month">Last Month</option>
+            </select>
+            <label for="category_filter">Filter by Category:</label>
+            <select id="category_filter" onchange="updateDashboard()">
+                <option value="all" selected>All Categories</option>
+                @foreach($categories as $category)
+                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                @endforeach
             </select>
         </div>
 
@@ -31,7 +38,6 @@
                 <th>Expense Type</th>
                 <th>Amount</th>
                 <th>Date Created</th>
-                <th>Actions</th>
             </tr>
             </thead>
             <tbody></tbody>
@@ -43,12 +49,11 @@
          * Update dashboard.
          */
         function updateDashboard() {
-            var filter = document.getElementById('filter').value;
-
             // Make an AJAX request to the backend to get updated stats
             axios.get('/dashboard/expense-stats', {
                 params: {
-                    filter: filter
+                    duration_filter: document.getElementById('duration_filter').value,
+                    category_filter: document.getElementById('category_filter').value
                 }
             })
                 .then(function (response) {
@@ -134,14 +139,6 @@
                 expensesRows += '<td>' + expense.expense_type + '</td>';
                 expensesRows += '<td>$' + expense.amount + '</td>';
                 expensesRows += '<td>' + expense.created_at.replace("T", " ").replace(".000000Z", "") + '</td>';
-                expensesRows += '<td>';
-                expensesRows += '<a href="/expenses/' + expense.id + '/edit" class="btn btn-warning">Edit</a>&nbsp';
-                expensesRows += '<form action="/expenses/' + expense.id + '" method="post" style="display:inline;">';
-                expensesRows += '@csrf';
-                expensesRows += '@method("DELETE")';
-                expensesRows += '<button type="submit" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Delete</button>';
-                expensesRows += '</form>';
-                expensesRows += '</td>';
                 expensesRows += '</tr>';
             });
 

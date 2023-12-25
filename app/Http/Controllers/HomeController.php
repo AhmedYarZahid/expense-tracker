@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -27,7 +28,8 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        $categories = Category::all();
+        return view('home', ['categories' => $categories]);
     }
 
     /**
@@ -42,7 +44,7 @@ class HomeController extends Controller
         $endDate = null;
 
         // Set the start and end dates based on the selected filter
-        switch ($request->get('filter')) {
+        switch ($request->get('duration_filter')) {
             case 'today':
                 $startDate = Carbon::now()->startOfDay();
                 $endDate = Carbon::now()->endOfDay();
@@ -60,14 +62,24 @@ class HomeController extends Controller
         $queryIn = Expense::query();
         $queryOut = Expense::query();
 
+        $categoryId = $request->get('category_filter');
+        if ($categoryId && $categoryId !== 'all') {
+            $queryIn->where('category_id', $categoryId);
+            $queryOut->where('category_id', $categoryId);
+        }
+
         if ($startDate && $endDate) {
             $queryIn->whereBetween('created_at', [$startDate, $endDate]);
             $queryOut->whereBetween('created_at', [$startDate, $endDate]);
-            $expenses = Expense::when($request->get('filter'), function ($query, $filter) use ($startDate, $endDate) {
+            $expenses = Expense::when($request->get('duration_filter'), function ($query, $filter) use ($startDate, $endDate) {
                 return $query->whereBetween('created_at', [$startDate, $endDate]);
+            })->when($categoryId && $categoryId !== 'all', function ($query) use ($categoryId) {
+                return $query->where('category_id', $categoryId);
             })->with('category')->get();
         } else {
-            $expenses = Expense::with('category')->get();
+            $expenses = Expense::with('category')->when($categoryId && $categoryId !== 'all', function ($query) use ($categoryId) {
+                return $query->where('category_id', $categoryId);
+            })->get();
         }
 
         $totalInExpenses = $queryIn->where('expense_type', 'in')->sum('amount');
